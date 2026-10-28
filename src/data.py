@@ -55,15 +55,23 @@ def clean(df: pd.DataFrame, cfg: Config) -> pd.DataFrame:
     else:
         df["q"] = df["period"]
     df = df.dropna(subset=["yr", "q"])
+    df = df[np.isfinite(df["yr"]) & np.isfinite(df["q"])]
+    df = df[(df["yr"] % 1 == 0) & (df["q"] % 1 == 0)]
     df["yr"], df["q"] = df["yr"].astype(int), df["q"].astype(int)
     df = df[df["q"].between(1, 4)]
     df["t"] = df["yr"] * 4 + (df["q"] - 1)
 
     # 3) Numeric, positive index; one row per place-quarter.
     df["index"] = pd.to_numeric(df[cfg.index_col], errors="coerce")
-    df = df[df["index"] > 0].dropna(subset=["index"])
+    df = df[(df["index"] > 0) & np.isfinite(df["index"])]
+    df = df.dropna(subset=["place_id", "place_name"])
+    for col in ["place_id", "place_name"]:
+        df[col] = df[col].astype(str).str.strip()
+        df = df[df[col] != ""]
     df["place_id"] = df["place_id"].astype(str)
-    df = df.drop_duplicates(["place_id", "t"], keep="last")
+    df = df.drop_duplicates(["place_id", "t", "index"])
+    if df.duplicated(["place_id", "t"]).any():
+        raise ValueError("Conflicting HPI values for the same place-quarter.")
 
     # 4) Drop places with short histories.
     counts = df.groupby("place_id")["t"].count()

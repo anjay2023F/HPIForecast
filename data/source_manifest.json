@@ -1,0 +1,14 @@
+﻿{
+    "source":  "https://www.fhfa.gov/hpi/download/monthly/hpi_master.csv",
+    "raw_sha256":  "5b60e562c74211475d6bad8f59d24c74316f31f956d922f6e9d97065393b0feb",
+    "verified_snapshot_date":  "2026-10-28",
+    "selection":  {
+                      "hpi_type":  "traditional",
+                      "hpi_flavor":  "all-transactions",
+                      "frequency":  "quarterly",
+                      "level":  "State",
+                      "index_col":  "index_nsa"
+                  },
+    "test_start":  "2005Q1",
+    "horizon_quarters":  4
+}

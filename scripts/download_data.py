@@ -15,7 +15,7 @@ ap.add_argument("--url", default=DEFAULT_URL)
 ap.add_argument("--out", default="data/raw/hpi_master.csv")
 args = ap.parse_args()
 
-os.makedirs(os.path.dirname(args.out), exist_ok=True)
+os.makedirs(os.path.dirname(args.out) or ".", exist_ok=True)
 req = urllib.request.Request(args.url, headers={"User-Agent": "Mozilla/5.0"})
 with urllib.request.urlopen(req, timeout=120) as r, open(args.out, "wb") as f:
     f.write(r.read())

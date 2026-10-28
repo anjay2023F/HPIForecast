@@ -14,10 +14,10 @@ from sklearn.base import clone
 from src import evaluate as ev
 from src import plots
 from src.config import Config
-from src.data import clean, load_raw
-from src.features import FEATURES, build_dataset
+from src.features import FEATURES
 from src.models import BASELINES, get_models
 from src.synthetic import make_synthetic
+from src.prepare import prepare
 
 
 def main():
@@ -43,8 +43,7 @@ def main():
                  "(or run scripts/download_data.py) and save it there, or pass --data.")
     os.makedirs(cfg.out_dir, exist_ok=True)
 
-    panel = clean(load_raw(cfg.raw_path), cfg)
-    all_rows, labeled = build_dataset(panel, cfg)
+    panel, all_rows, labeled = prepare(cfg, f"{cfg.out_dir}/processed")
     models = get_models(cfg.random_state)
     pred_cols = BASELINES + list(models)
 

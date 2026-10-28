@@ -72,6 +72,7 @@ def build_dataset(panel: pd.DataFrame, cfg: Config):
     df["yr"] = df["t"] // 4
     df["q"] = df["t"] % 4 + 1
 
+    df = df.replace([np.inf, -np.inf], np.nan)
     all_rows = df.dropna(subset=FEATURES).reset_index(drop=True)
     labeled = all_rows.dropna(subset=["target"]).reset_index(drop=True)
     print(f"[features] {len(labeled):,} labeled place-quarters "

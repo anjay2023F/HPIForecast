@@ -9,14 +9,14 @@ from .models import BASELINES
 
 def walk_forward(labeled: pd.DataFrame, cfg: Config, models: dict, features: list) -> pd.DataFrame:
     """Expanding-window walk-forward. For each test year Y the models are fit only on origins whose
-    target was already realised before Y began (t + horizon <= first quarter of Y), so no future
+    target was already realised before Y began (t + horizon < first quarter of Y), so no future
     information reaches the training set. Random shuffling is never used."""
     h = cfg.horizon_q
     last = cfg.last_test_year or int(labeled["yr"].max())
     parts = []
     for Y in range(cfg.first_test_year, last + 1):
         test = labeled[labeled["yr"] == Y]
-        train = labeled[labeled["t"] + h <= Y * 4]
+        train = labeled[labeled["t"] + h < Y * 4]
         if test.empty or len(train) < cfg.min_train_rows:
             continue
         part = test[["place_id", "place_name", "t", "yr", "q"]].copy()
@@ -42,7 +42,9 @@ def add_regimes(res: pd.DataFrame, cfg: Config) -> pd.DataFrame:
     nat = res.groupby("t")["actual"].transform("median")
     res = res.copy()
     res["national_actual"] = nat
-    res["regime"] = pd.cut(nat, [-np.inf, lo, hi, np.inf], labels=["decline", "steady", "boom"])
+    res["regime"] = pd.Categorical(
+        np.select([nat < lo, nat > hi], ["decline", "boom"], default="steady"),
+        categories=["decline", "steady", "boom"], ordered=True)
     return res
 
 
